@@ -1,0 +1,35 @@
+# Dependencies and generated output
+node_modules/
+dist/
+.next/
+.vinext/
+.wrangler/
+out/
+coverage/
+next-env.d.ts
+*.tsbuildinfo
+
+# Credentials and local environment
+.env
+.env.*
+!.env.example
+.dev.vars
+.dev.vars.*
+*.pem
+*.key
+.npmrc
+
+# Local tools, caches, and hosting-specific state
+.openai/
+.codex/
+.agents/
+.impeccable/
+.vercel/
+.vscode/
+.idea/
+config/
+work/
+outputs/
+*.log
+.DS_Store
+Thumbs.db
