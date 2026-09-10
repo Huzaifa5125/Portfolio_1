@@ -4,10 +4,11 @@ A personal portfolio for [Huzaifa Ali](https://github.com/Huzaifa5125), an AI/ML
 
 ## Features
 
-- Responsive project, experience, skills, and contact sections.
+- Paired featured project cards with descriptions underneath; stacked on mobile.
+- Compact, responsive experience, skills, and contact sections.
 - Light and dark themes with a saved preference.
 - Scroll reveals that replay in both directions.
-- A cursor-following dot trail that scatters and fades when idle.
+- A soft cursor light and responsive halo that fade out when idle.
 - Reduced-motion support, keyboard navigation, and accessible controls.
 
 ## Run locally
@@ -36,20 +37,20 @@ To preview the production build locally, run `npm start` after building. This st
 
 ## Project structure
 
-| Path | Purpose |
-| --- | --- |
-| `app/page.tsx` | Portfolio content and layout |
-| `app/globals.css` | Responsive styling, themes, and CSS animations |
-| `app/layout.tsx` | Page metadata and initial theme selection |
-| `app/motion.tsx` | Scroll, navigation, and card interactions |
-| `app/reveals.ts` | Repeatable scroll-reveal behavior |
-| `app/pointer-field.ts` | Cursor trail and idle scattering |
-| `app/theme-toggle.tsx` | Theme switch and saved preferences |
-| `components/ui/button.tsx` | The UI component used by the theme switch |
-| `lib/utils.ts` | Component class-name utilities |
-| `public/favicon.svg` | Site icon |
-| `tests/motion.test.mjs` | Motion, accessibility, and theme regression tests |
-| `vite.config.ts` | Vinext, Tailwind, and Cloudflare build configuration |
+| Path                       | Purpose                                              |
+| -------------------------- | ---------------------------------------------------- |
+| `app/page.tsx`             | Portfolio content and layout                         |
+| `app/globals.css`          | Responsive styling, themes, and CSS animations       |
+| `app/layout.tsx`           | Page metadata and initial theme selection            |
+| `app/motion.tsx`           | Scroll, navigation, and card interactions            |
+| `app/reveals.ts`           | Repeatable scroll-reveal behavior                    |
+| `app/pointer-field.ts`     | Ambient cursor light and interactive halo            |
+| `app/theme-toggle.tsx`     | Theme switch and saved preferences                   |
+| `components/ui/button.tsx` | The UI component used by the theme switch            |
+| `lib/utils.ts`             | Component class-name utilities                       |
+| `public/favicon.svg`       | Site icon                                            |
+| `tests/motion.test.mjs`    | Motion, accessibility, and theme regression tests    |
+| `vite.config.ts`           | Vinext, Tailwind, and Cloudflare build configuration |
 
 Built with React, TypeScript, Vinext/Vite, Tailwind CSS, and native browser animation APIs. The repository contains the necessary source and configuration; dependencies, generated builds, credentials, and personal hosting state are ignored.
 

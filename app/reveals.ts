@@ -30,18 +30,20 @@ export function observeReveals(
           if (entry.isIntersecting) {
             if (!element.classList.contains('reveal-pending')) return;
             const offset = offsets.get(element) ?? 22;
+            const isProject = element.dataset.reveal === 'project';
             show(element);
             if (element.contains(document.activeElement)) return;
             const animation = element.animate(
               [
                 {
                   opacity: 0,
-                  transform: `translate3d(0, ${offset}px, 0)`,
+                  transform: `translate3d(0, ${offset * (isProject ? 1.5 : 1)}px, 0)`,
+                  scale: isProject ? '0.985' : '1',
                 },
-                { opacity: 1, transform: 'translate3d(0, 0, 0)' },
+                { opacity: 1, transform: 'translate3d(0, 0, 0)', scale: '1' },
               ],
               {
-                duration: 760,
+                duration: isProject ? 900 : 700,
                 delay: Number(element.dataset.delay ?? 0),
                 easing: 'cubic-bezier(.16,1,.3,1)',
                 fill: 'backwards',

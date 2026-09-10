@@ -157,23 +157,19 @@ export default function Home() {
         </section>
         <section className="work wrap" id="work" aria-labelledby="work-heading">
           <div className="section-heading" data-reveal>
-            <h2 id="work-heading" data-parallax="18">
-              A few things
-              <br />
-              I’ve built.
+            <h2 id="work-heading" data-parallax="12">
+              A few things I’ve built.
             </h2>
             <p>
-              From first principles
-              <br />
+              From first principles <br />
               to working applications.
             </p>
           </div>
           <div className="featured-grid">
-            <article className="project">
+            <article className="project" data-reveal="project">
               <a
                 className="project-visual transformer"
                 data-tilt
-                data-reveal
                 href={`${github}/gpt-from-scratch`}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -185,7 +181,7 @@ export default function Home() {
                     <Arrow diagonal />
                   </span>
                 </div>
-                <div className="model-title" data-parallax="20">
+                <div className="model-title">
                   GPT–2<span>Built from scratch.</span>
                 </div>
                 <div
@@ -217,8 +213,7 @@ export default function Home() {
                   </div>
                 </div>
               </a>
-              <div className="project-details" data-reveal data-delay="80">
-                <span className="eyebrow">01 / LANGUAGE MODELING</span>
+              <div className="project-details">
                 <div className="project-caption">
                   <h3>
                     <a
@@ -229,32 +224,35 @@ export default function Home() {
                       GPT-2 from scratch <Arrow diagonal />
                     </a>
                   </h3>
-                  <span>PyTorch · DDP · WikiText-103</span>
                 </div>
                 <p className="project-description">
                   A complete decoder-only Transformer, from custom tokenization
                   and causal self-attention to distributed training across four
                   GPUs.
                 </p>
+                <ul className="project-tags" aria-label="GPT-2 technologies">
+                  <li>PyTorch</li>
+                  <li>DDP</li>
+                  <li>WikiText-103</li>
+                </ul>
               </div>
             </article>
-            <article className="project">
+            <article className="project" data-reveal="project" data-delay="90">
               <a
                 className="project-visual campus"
                 data-tilt
-                data-reveal
                 href={`${github}/CCET-Campus-Assitance`}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="View College RAG Assistant on GitHub (opens in new tab)"
               >
                 <div className="visual-top">
-                  <span>02 / RETRIEVAL-AUGMENTED GENERATION</span>
+                  <span>02 / RETRIEVAL & CONTEXT</span>
                   <span className="visual-link">
                     <Arrow diagonal />
                   </span>
                 </div>
-                <div className="campus-title" data-parallax="-16">
+                <div className="campus-title">
                   Campus
                   <br />
                   <span>context.</span>
@@ -275,8 +273,7 @@ export default function Home() {
                   <span>CONTEXT → CLARITY</span>
                 </div>
               </a>
-              <div className="project-details" data-reveal data-delay="80">
-                <span className="eyebrow">02 / RETRIEVAL & CONTEXT</span>
+              <div className="project-details">
                 <div className="project-caption">
                   <h3>
                     <a
@@ -287,19 +284,31 @@ export default function Home() {
                       College RAG assistant <Arrow diagonal />
                     </a>
                   </h3>
-                  <span>LangChain · FAISS · Gemini</span>
                 </div>
                 <p className="project-description">
                   Helping students navigate college information with grounded
                   answers, contextual retrieval, and memory across
                   conversations.
                 </p>
+                <ul
+                  className="project-tags"
+                  aria-label="RAG assistant technologies"
+                >
+                  <li>LangChain</li>
+                  <li>FAISS</li>
+                  <li>Gemini</li>
+                </ul>
               </div>
             </article>
           </div>
           <div className="project-list">
-            {moreProjects.map((project) => (
-              <article key={project.number} className="project-row" data-reveal>
+            {moreProjects.map((project, index) => (
+              <article
+                key={project.number}
+                className="project-row"
+                data-reveal
+                data-delay={index * 45}
+              >
                 <span className="project-index">{project.number}</span>
                 <div className="row-heading">
                   <span className="project-type">{project.type}</span>

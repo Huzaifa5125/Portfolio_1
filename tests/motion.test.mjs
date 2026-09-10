@@ -204,79 +204,108 @@ test('reduced motion disables reveals immediately and cleanup removes listeners'
   assert.equal(doc.listeners.get('focusin').size, 0);
 });
 
-test('pointer dots follow, scatter on pause, fade, and release the animation loop', (t) => {
+function pointerField() {
+  const field = element();
+  const glow = element();
+  const ring = element();
+  field.querySelector = (selector) =>
+    selector === '.pointer-glow' ? glow : ring;
+  return { field, glow, ring };
+}
+
+test('cursor light follows smoothly, fades at rest, and releases its frame loop', (t) => {
   const { reduced, win, frames, tick } = environment(t);
   const fine = eventTarget({ matches: true });
-  const field = element();
-  const dots = Array.from({ length: 28 }, () => element());
-  field.querySelectorAll = () => dots;
+  const { field, glow, ring } = pointerField();
   const cleanup = attachPointerField(field, reduced, fine);
-  win.emit('pointermove', { pointerType: 'touch', clientX: 10, clientY: 10 });
-  assert.equal(frames.size, 0);
   win.emit('pointermove', { pointerType: 'mouse', clientX: 100, clientY: 100 });
+  for (let i = 0; i < 12; i++) tick();
+  assert.equal(Number(ring.style.opacity), 1, 'halo fades into view');
+  win.emit('pointermove', { pointerType: 'mouse', clientX: 600, clientY: 300 });
   tick();
-  assert.ok(
-    dots.every((dot) => Number(dot.style.opacity) > 0.4),
-    'trail is visible',
-  );
-  assert.equal(frames.size, 1, 'animation continues through the pause');
-  const following = dots.map((dot) => dot.style.transform);
-  for (let i = 0; i < 35; i++) tick();
-  assert.ok(
-    dots.every((dot, i) => dot.style.transform !== following[i]),
-    'dots scatter outward',
-  );
-  assert.ok(Number(dots[0].style.opacity) < 0.8, 'scattered dots fade');
-  for (let i = 0; i < 100 && frames.size; i++) tick();
-  assert.equal(frames.size, 0, 'idle particles stop requesting frames');
-  assert.ok(dots.every((dot) => dot.style.opacity === '0'));
-  assert.equal(field.classList.contains('pointer-active'), false);
+  const x = (layer) =>
+    Number(layer.style.transform.match(/translate3d\(([\d.]+)px/)[1]);
+  assert.ok(x(ring) > 100 && x(ring) < 600, 'halo eases toward the pointer');
+  assert.ok(x(glow) < x(ring), 'ambient light has a softer response');
+  assert.equal(frames.size, 1, 'one animation loop drives both layers');
+  for (let i = 0; i < 55; i++) tick();
+  assert.ok(Number(ring.style.opacity) < 1, 'stationary effect fades');
+  for (let i = 0; i < 40 && frames.size; i++) tick();
+  assert.equal(frames.size, 0, 'no animation frames run at rest');
+  assert.equal(glow.style.opacity, '0');
+  assert.equal(ring.style.opacity, '0');
   win.emit('pointermove', { pointerType: 'mouse', clientX: 500, clientY: 400 });
   tick();
   assert.ok(
-    dots.every((dot) => Number(dot.style.opacity) > 0.4),
-    'trail restarts on the next movement',
+    Number(ring.style.opacity) > 0,
+    'the next movement restarts the effect',
+  );
+  assert.match(
+    ring.style.transform,
+    /500.00px, 400.00px/,
+    'restarts at the new pointer, without flying across the page',
   );
   cleanup();
   assert.equal(frames.size, 0);
   assert.equal(win.listeners.get('pointermove').size, 0);
+  assert.equal(win.listeners.get('scroll').size, 0);
 });
 
-test('moving again during scattering gathers the same dots back into a trail', (t) => {
-  const { reduced, win, frames, tick } = environment(t);
-  const field = element();
-  const dots = Array.from({ length: 28 }, () => element());
-  field.querySelectorAll = () => dots;
+test('cursor halo responds to links and resets when scrolling, leaving, or cancelling', (t) => {
+  const { reduced, win, doc, frames, tick } = environment(t);
+  const { field, ring } = pointerField();
   const cleanup = attachPointerField(
     field,
     reduced,
     eventTarget({ matches: true }),
   );
-  win.emit('pointermove', { pointerType: 'mouse', clientX: 100, clientY: 100 });
-  for (let i = 0; i < 40; i++) tick();
-  assert.ok(Number(dots[0].style.opacity) < 0.7);
-  const scattered = dots[0].style.transform;
-  win.emit('pointermove', { pointerType: 'mouse', clientX: 600, clientY: 300 });
+  const event = {
+    pointerType: 'mouse',
+    clientX: 100,
+    clientY: 100,
+    target: { closest: () => ({}) },
+  };
+  win.emit('pointermove', event);
   tick();
-  assert.equal(Number(dots[0].style.opacity), 0.9);
-  assert.notEqual(dots[0].style.transform, scattered);
-  assert.equal(frames.size, 1, 'only one frame loop runs');
+  assert.ok(field.classList.contains('pointer-engaged'));
+  win.emit('pointermove', { ...event, target: { closest: () => null } });
+  assert.equal(field.classList.contains('pointer-engaged'), false);
+  for (const [surface, type] of [
+    [win, 'scroll'],
+    [win, 'blur'],
+    [win, 'pointercancel'],
+    [doc.documentElement, 'pointerleave'],
+  ]) {
+    win.emit('pointermove', event);
+    tick();
+    surface.emit(type);
+    assert.equal(frames.size, 0);
+    assert.equal(ring.style.opacity, '0');
+    assert.equal(field.classList.contains('pointer-engaged'), false);
+  }
   cleanup();
+  assert.equal(doc.documentElement.listeners.get('pointerleave').size, 0);
 });
 
-test('pointer trail respects reduced motion, touch, and background tabs', (t) => {
+test('cursor light respects reduced motion, touch, pointer changes, and background tabs', (t) => {
   const { reduced, win, frames, doc, tick } = environment(t, true);
   const fine = eventTarget({ matches: true });
-  const field = element();
-  const dots = Array.from({ length: 28 }, () => element());
-  field.querySelectorAll = () => dots;
+  const { field, glow, ring } = pointerField();
   const cleanup = attachPointerField(field, reduced, fine);
   const event = { pointerType: 'mouse', clientX: 100, clientY: 100 };
   win.emit('pointermove', event);
   assert.equal(frames.size, 0);
   reduced.matches = false;
+  win.emit('pointermove', { ...event, pointerType: 'touch' });
+  assert.equal(frames.size, 0);
   fine.matches = false;
   win.emit('pointermove', event);
+  assert.equal(frames.size, 0);
+  fine.matches = true;
+  win.emit('pointermove', event);
+  tick();
+  fine.matches = false;
+  fine.emit('change');
   assert.equal(frames.size, 0);
   fine.matches = true;
   win.emit('pointermove', event);
@@ -284,15 +313,19 @@ test('pointer trail respects reduced motion, touch, and background tabs', (t) =>
   doc.hidden = true;
   doc.emit('visibilitychange');
   assert.equal(frames.size, 0);
-  assert.ok(dots.every((dot) => dot.style.opacity === '0'));
+  assert.equal(glow.style.opacity, '0');
+  win.emit('pointermove', event);
+  assert.equal(frames.size, 0, 'hidden pages cannot restart the effect');
   doc.hidden = false;
   win.emit('pointermove', event);
   tick();
   reduced.matches = true;
   reduced.emit('change');
   assert.equal(frames.size, 0);
-  assert.ok(dots.every((dot) => dot.style.opacity === '0'));
+  assert.equal(ring.style.opacity, '0');
   cleanup();
+  assert.equal(doc.listeners.get('visibilitychange').size, 0);
+  assert.equal(fine.listeners.get('change').size, 0);
 });
 
 test('theme bootstrap restores preferences and tolerates blocked storage', () => {

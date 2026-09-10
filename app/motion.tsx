@@ -180,9 +180,12 @@ export default function PortfolioMotion() {
     <>
       <div className="reading-progress" aria-hidden="true" />
       <div className="pointer-field" aria-hidden="true">
-        {Array.from({ length: 28 }, (_, index) => (
-          <span className="pointer-dot" key={index} />
-        ))}
+        <div className="pointer-background">
+          <span className="pointer-glow" />
+        </div>
+        <div className="pointer-foreground">
+          <span className="pointer-ring" />
+        </div>
       </div>
     </>
   );
