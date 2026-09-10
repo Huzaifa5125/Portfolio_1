@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { observeReveals } from './reveals';
 import { attachPointerField } from './pointer-field';
+import { attachFeaturedScroll } from './featured-scroll';
 
 /** Progressive enhancement: the complete portfolio stays readable without JS. */
 export default function PortfolioMotion() {
@@ -12,7 +13,7 @@ export default function PortfolioMotion() {
     const root = document.documentElement;
     const reveals = Array.from(
       document.querySelectorAll<HTMLElement>('[data-reveal]'),
-    );
+    ).filter((element) => !element.closest('[data-featured-scroll]'));
     const cards = Array.from(
       document.querySelectorAll<HTMLElement>('[data-tilt]'),
     );
@@ -31,6 +32,10 @@ export default function PortfolioMotion() {
     );
     const field = document.querySelector<HTMLElement>('.pointer-field');
     const stopReveals = observeReveals(reveals, reducedMotion);
+    const featured = document.querySelector<HTMLElement>(
+      '[data-featured-scroll]',
+    );
+    if (featured) cleanups.push(attachFeaturedScroll(featured, reducedMotion));
     if (field)
       cleanups.push(attachPointerField(field, reducedMotion, finePointer));
     let scrollFrame = 0;

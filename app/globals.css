@@ -459,6 +459,30 @@ h1 {
   min-width: 0;
   padding-inline: 2px;
 }
+/* The complete pair remains in normal flow until its measured height fits. */
+@media (min-width: 900px) and (prefers-reduced-motion: no-preference) {
+  .featured-scroll.is-pinned {
+    position: relative;
+    height: calc(var(--pin-height) + var(--pin-travel));
+  }
+  .is-pinned .featured-pin {
+    position: sticky;
+    top: var(--pin-top);
+    overflow: clip;
+    overflow-clip-margin: 12px;
+  }
+  .is-pinned .project {
+    translate: 0 var(--card-y, 0px);
+    scale: var(--card-scale, 1);
+    opacity: var(--card-opacity, 1);
+    will-change: translate, scale, opacity;
+  }
+  .is-pinned .project:focus-within {
+    translate: none;
+    scale: 1;
+    opacity: 1;
+  }
+}
 .eyebrow {
   display: block;
   color: var(--muted-foreground);
@@ -1548,6 +1572,43 @@ footer a {
     font-size: 32px;
   }
 }
+/* A shorter illustration leaves room for the descriptions on laptop screens. */
+@media (min-width: 900px) and (prefers-reduced-motion: no-preference) {
+  .featured-pin .project-visual {
+    min-height: clamp(320px, 44vh, 400px);
+    padding: 24px;
+  }
+  .featured-pin .model-title {
+    font-size: 64px;
+    margin: 16px 0 14px;
+  }
+  .featured-pin .model-title > span {
+    margin-top: 8px;
+    font-size: 14px;
+  }
+  .featured-pin .model-flow {
+    padding: 4px 0 16px;
+  }
+  .featured-pin .flow-block {
+    padding: 10px 8px;
+  }
+  .featured-pin .visual-stats {
+    padding-top: 12px;
+  }
+  .featured-pin .visual-stats strong {
+    font-size: 26px;
+  }
+  .featured-pin .campus-title {
+    font-size: 62px;
+    margin: 16px 0;
+  }
+  .featured-pin .rag-flow > div {
+    padding-top: 8px;
+  }
+  .featured-pin .visual-footer {
+    padding-top: 16px;
+  }
+}
 @media (hover: none), (pointer: coarse) {
   .pointer-field {
     display: none;
@@ -1583,6 +1644,18 @@ footer a {
   }
 }
 @media print {
+  .featured-scroll.is-pinned {
+    height: auto;
+  }
+  .is-pinned .featured-pin {
+    position: static;
+    overflow: visible;
+  }
+  .is-pinned .project {
+    translate: none;
+    scale: none;
+    opacity: 1;
+  }
   .site-header {
     position: static;
   }

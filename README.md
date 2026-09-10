@@ -7,6 +7,8 @@ A personal portfolio for [Huzaifa Ali](https://github.com/Huzaifa5125), an AI/ML
 - Paired featured project cards with descriptions underneath; stacked on mobile.
 - Compact, responsive experience, skills, and contact sections.
 - Light and dark themes with a saved preference.
+- Pinned featured cards that arrive one by one as you scroll, then release into the smaller projects.
+- Reversible scroll motion, with a normal layout on smaller or shorter screens and for keyboard navigation.
 - Scroll reveals that replay in both directions.
 - A soft cursor light and responsive halo that fade out when idle.
 - Reduced-motion support, keyboard navigation, and accessible controls.
@@ -43,6 +45,7 @@ To preview the production build locally, run `npm start` after building. This st
 | `app/globals.css`          | Responsive styling, themes, and CSS animations       |
 | `app/layout.tsx`           | Page metadata and initial theme selection            |
 | `app/motion.tsx`           | Scroll, navigation, and card interactions            |
+| `app/featured-scroll.ts`   | Pinned project sequence and responsive fallbacks     |
 | `app/reveals.ts`           | Repeatable scroll-reveal behavior                    |
 | `app/pointer-field.ts`     | Ambient cursor light and interactive halo            |
 | `app/theme-toggle.tsx`     | Theme switch and saved preferences                   |

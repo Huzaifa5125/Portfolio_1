@@ -4,6 +4,10 @@ import { readFileSync } from 'node:fs';
 import { runInNewContext } from 'node:vm';
 import { observeReveals } from '../app/reveals.ts';
 import { attachPointerField } from '../app/pointer-field.ts';
+import {
+  attachFeaturedScroll,
+  featuredProgress,
+} from '../app/featured-scroll.ts';
 
 function eventTarget(extra = {}) {
   const listeners = new Map();
@@ -24,16 +28,24 @@ function eventTarget(extra = {}) {
 }
 function element(top = 900, height = 200) {
   const classes = new Set();
-  return {
+  const el = eventTarget({
     dataset: {},
     animations: [],
     top,
     height,
-    style: {},
+    style: {
+      setProperty(key, value) {
+        this[key] = value;
+      },
+      removeProperty(key) {
+        delete this[key];
+      },
+    },
     classList: {
       add: (key) => classes.add(key),
       remove: (key) => classes.delete(key),
       contains: (key) => classes.has(key),
+      toggle: (key, force) => (force ? classes.add(key) : classes.delete(key)),
     },
     getBoundingClientRect() {
       return {
@@ -60,7 +72,13 @@ function element(top = 900, height = 200) {
       this.animations.push(animation);
       return animation;
     },
-  };
+  });
+  Object.defineProperty(el, 'offsetHeight', {
+    get() {
+      return this.height;
+    },
+  });
+  return el;
 }
 function environment(t, matches = false) {
   const observers = [];
@@ -326,6 +344,226 @@ test('cursor light respects reduced motion, touch, pointer changes, and backgrou
   cleanup();
   assert.equal(doc.listeners.get('visibilitychange').size, 0);
   assert.equal(fine.listeners.get('change').size, 0);
+});
+
+function featuredScene(t, reduced = false) {
+  const env = environment(t, reduced);
+  const track = element(104, 540);
+  const stage = element(104, 540);
+  const cards = [element(104, 540), element(104, 540)];
+  const header = element(0, 88);
+  const desktop = eventTarget({ matches: true });
+  const sizes = [];
+  track.querySelector = () => stage;
+  track.querySelectorAll = () => cards;
+  env.doc.querySelector = () => header;
+  env.win.matchMedia = () => desktop;
+  globalThis.ResizeObserver = class {
+    constructor(callback) {
+      this.callback = callback;
+      this.targets = [];
+      sizes.push(this);
+    }
+    observe(target) {
+      this.targets.push(target);
+    }
+    disconnect() {
+      this.disconnected = true;
+    }
+  };
+  t.after(() => {
+    delete globalThis.ResizeObserver;
+  });
+  return { ...env, track, stage, cards, header, desktop, sizes };
+}
+
+test('featured sequence arrives in order and holds both cards before releasing', () => {
+  const viewport = 800,
+    inset = 104,
+    travel = 1000;
+  const at = (position) =>
+    featuredProgress(inset - travel * position, viewport, inset, travel);
+  assert.deepEqual(featuredProgress(900, viewport, inset, travel), [0, 0]);
+  assert.ok(
+    at(0)[0] > 0 && at(0)[0] < 1,
+    'first card enters as the section approaches',
+  );
+  assert.deepEqual(
+    at(0.24),
+    [1, 0],
+    'first card arrives before the second starts',
+  );
+  assert.equal(at(0.52)[0], 1);
+  assert.ok(Math.abs(at(0.52)[1] - 0.5) < 0.001);
+  assert.deepEqual(
+    at(0.8),
+    [1, 1],
+    'both cards settle before the sticky section ends',
+  );
+  assert.deepEqual(
+    at(1.4),
+    [1, 1],
+    'normal scrolling continues with both cards visible',
+  );
+  for (const position of [0.3, 0.5, 0.7, 1, 0.7, 0.5, 0.3]) {
+    const result = at(position);
+    assert.ok(result.every((value) => value >= 0 && value <= 1));
+    assert.ok(result[0] >= result[1]);
+  }
+});
+
+test('pinned cards scrub forward and backward without an idle animation loop', (t) => {
+  const { track, cards, reduced, win, tick, frames } = featuredScene(t);
+  const cleanup = attachFeaturedScroll(track, reduced);
+  assert.ok(track.classList.contains('is-pinned'));
+  assert.equal(track.style['--pin-top'], '104px');
+  assert.equal(track.style['--pin-height'], '540px');
+  assert.equal(track.style['--pin-travel'], '1000px');
+  track.top = 104 - 800;
+  win.emit('scroll');
+  win.emit('scroll');
+  win.emit('scroll');
+  assert.equal(frames.size, 1, 'scroll events share a single scheduled frame');
+  tick();
+  assert.ok(cards.every((card) => card.style['--card-y'] === '0.00px'));
+  assert.equal(frames.size, 0, 'frames only run in response to events');
+  track.top = 104 - 520;
+  win.emit('scroll');
+  tick();
+  const halfway = cards[1].style['--card-y'];
+  assert.equal(cards[0].style['--card-y'], '0.00px');
+  assert.ok(parseFloat(halfway) > 0);
+  track.top = 104;
+  win.emit('scroll');
+  tick();
+  assert.ok(parseFloat(cards[1].style['--card-y']) > parseFloat(halfway));
+  track.top = 104 - 520;
+  win.emit('scroll');
+  tick();
+  assert.equal(
+    cards[1].style['--card-y'],
+    halfway,
+    'revisiting a scroll position restores exactly the same frame',
+  );
+  cleanup();
+});
+
+test('pinning falls back for reduced motion, narrow screens, or content that cannot fit', (t) => {
+  const { track, cards, stage, reduced, desktop, tick, sizes, header } =
+    featuredScene(t, true);
+  const cleanup = attachFeaturedScroll(track, reduced);
+  assert.equal(track.classList.contains('is-pinned'), false);
+  assert.equal(track.style['--pin-travel'], undefined);
+  reduced.matches = false;
+  reduced.emit('change');
+  tick();
+  assert.ok(track.classList.contains('is-pinned'));
+  desktop.matches = false;
+  desktop.emit('change');
+  tick();
+  assert.equal(track.classList.contains('is-pinned'), false);
+  assert.ok(cards.every((card) => card.style['--card-y'] === undefined));
+  desktop.matches = true;
+  stage.height = 900;
+  desktop.emit('change');
+  tick();
+  assert.equal(
+    track.classList.contains('is-pinned'),
+    false,
+    'enlarged text and short viewports keep ordinary scrolling',
+  );
+  stage.height = 540;
+  header.height = 96;
+  sizes[0].callback();
+  tick();
+  assert.ok(track.classList.contains('is-pinned'));
+  assert.equal(track.style['--pin-top'], '112px');
+  assert.ok(
+    sizes[0].targets.includes(stage) && sizes[0].targets.includes(header),
+  );
+  reduced.matches = true;
+  reduced.emit('change');
+  tick();
+  assert.equal(
+    track.style['--pin-height'],
+    undefined,
+    'disabling removes the extra scroll distance',
+  );
+  assert.ok(cards.every((card) => !card.classList.contains('reveal-pending')));
+  cleanup();
+});
+
+test('Tab navigation restores document flow without intercepting the key', (t) => {
+  const { track, cards, reduced, win, tick } = featuredScene(t);
+  const cleanup = attachFeaturedScroll(track, reduced);
+  win.emit('keydown', {
+    key: 'Tab',
+    preventDefault() {
+      assert.fail('Tab must not be intercepted');
+    },
+  });
+  assert.equal(track.classList.contains('is-pinned'), false);
+  assert.equal(track.style['--pin-travel'], undefined);
+  assert.ok(cards.every((card) => card.style['--card-opacity'] === undefined));
+  win.emit('resize');
+  tick();
+  assert.equal(
+    track.classList.contains('is-pinned'),
+    false,
+    'keyboard browsing stays in normal flow',
+  );
+  cleanup();
+});
+
+test('programmatic focus keeps an unrevealed project visible', (t) => {
+  const { track, cards, reduced, doc, tick } = featuredScene(t);
+  const cleanup = attachFeaturedScroll(track, reduced);
+  assert.equal(cards[1].style['--card-opacity'], '0');
+  doc.activeElement = cards[1];
+  track.emit('focusin');
+  tick();
+  assert.equal(cards[1].style['--card-opacity'], '1');
+  assert.equal(cards[1].style['--card-y'], '0.00px');
+  doc.activeElement = null;
+  track.emit('focusout');
+  tick();
+  assert.equal(cards[1].style['--card-opacity'], '0');
+  cleanup();
+});
+
+test('pinned sequence pauses in background tabs and cleans up on unmount', (t) => {
+  const { track, cards, reduced, win, doc, sizes, desktop, frames, tick } =
+    featuredScene(t);
+  const cleanup = attachFeaturedScroll(track, reduced);
+  win.emit('scroll');
+  doc.hidden = true;
+  doc.emit('visibilitychange');
+  assert.equal(frames.size, 0);
+  win.emit('scroll');
+  assert.equal(frames.size, 0);
+  doc.hidden = false;
+  doc.emit('visibilitychange');
+  tick();
+  assert.ok(track.classList.contains('is-pinned'));
+  win.emit('scroll');
+  cleanup();
+  assert.equal(frames.size, 0);
+  assert.ok(sizes[0].disconnected);
+  assert.equal(track.classList.contains('is-pinned'), false);
+  assert.equal(track.style['--pin-height'], undefined);
+  assert.ok(cards.every((card) => card.style['--card-y'] === undefined));
+  assert.equal(win.listeners.get('scroll').size, 0);
+  assert.equal(win.listeners.get('resize').size, 0);
+  assert.equal(win.listeners.get('keydown').size, 0);
+  assert.equal(track.listeners.get('focusin').size, 0);
+  assert.equal(reduced.listeners.get('change').size, 0);
+  assert.equal(desktop.listeners.get('change').size, 0);
+  sizes[0].callback();
+  assert.equal(
+    frames.size,
+    0,
+    'late resize callbacks cannot restart a destroyed effect',
+  );
 });
 
 test('theme bootstrap restores preferences and tolerates blocked storage', () => {

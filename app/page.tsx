@@ -165,141 +165,152 @@ export default function Home() {
               to working applications.
             </p>
           </div>
-          <div className="featured-grid">
-            <article className="project" data-reveal="project">
-              <a
-                className="project-visual transformer"
-                data-tilt
-                href={`${github}/gpt-from-scratch`}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="View GPT-2 From Scratch on GitHub (opens in new tab)"
-              >
-                <div className="visual-top">
-                  <span>01 / LANGUAGE MODEL</span>
-                  <span className="visual-link">
-                    <Arrow diagonal />
-                  </span>
-                </div>
-                <div className="model-title">
-                  GPT–2<span>Built from scratch.</span>
-                </div>
-                <div
-                  className="model-flow"
-                  aria-label="Decoder-only transformer: token embeddings, 12 transformer blocks, output probabilities"
-                >
-                  <span>Tokens</span>
-                  <i>→</i>
-                  <span>Embeddings</span>
-                  <i>→</i>
-                  <span className="flow-block">
-                    Transformer<small>× 12 blocks</small>
-                  </span>
-                  <i>→</i>
-                  <span>Output</span>
-                </div>
-                <div className="visual-stats">
-                  <div>
-                    <strong>124M</strong>
-                    <span>PARAMETERS</span>
-                  </div>
-                  <div>
-                    <strong>19.66</strong>
-                    <span>TEST PERPLEXITY</span>
-                  </div>
-                  <div>
-                    <strong>4× V100</strong>
-                    <span>DISTRIBUTED TRAINING</span>
-                  </div>
-                </div>
-              </a>
-              <div className="project-details">
-                <div className="project-caption">
-                  <h3>
-                    <a
-                      href={`${github}/gpt-from-scratch`}
-                      target="_blank"
-                      rel="noopener noreferrer"
+          <div className="featured-scroll" data-featured-scroll>
+            <div className="featured-pin">
+              <div className="featured-grid">
+                <article className="project" data-reveal="project">
+                  <a
+                    className="project-visual transformer"
+                    data-tilt
+                    href={`${github}/gpt-from-scratch`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="View GPT-2 From Scratch on GitHub (opens in new tab)"
+                  >
+                    <div className="visual-top">
+                      <span>01 / LANGUAGE MODEL</span>
+                      <span className="visual-link">
+                        <Arrow diagonal />
+                      </span>
+                    </div>
+                    <div className="model-title">
+                      GPT–2<span>Built from scratch.</span>
+                    </div>
+                    <div
+                      className="model-flow"
+                      aria-label="Decoder-only transformer: token embeddings, 12 transformer blocks, output probabilities"
                     >
-                      GPT-2 from scratch <Arrow diagonal />
-                    </a>
-                  </h3>
-                </div>
-                <p className="project-description">
-                  A complete decoder-only Transformer, from custom tokenization
-                  and causal self-attention to distributed training across four
-                  GPUs.
-                </p>
-                <ul className="project-tags" aria-label="GPT-2 technologies">
-                  <li>PyTorch</li>
-                  <li>DDP</li>
-                  <li>WikiText-103</li>
-                </ul>
-              </div>
-            </article>
-            <article className="project" data-reveal="project" data-delay="90">
-              <a
-                className="project-visual campus"
-                data-tilt
-                href={`${github}/CCET-Campus-Assitance`}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="View College RAG Assistant on GitHub (opens in new tab)"
-              >
-                <div className="visual-top">
-                  <span>02 / RETRIEVAL & CONTEXT</span>
-                  <span className="visual-link">
-                    <Arrow diagonal />
-                  </span>
-                </div>
-                <div className="campus-title">
-                  Campus
-                  <br />
-                  <span>context.</span>
-                </div>
-                <div className="rag-flow">
-                  <div>
-                    <span>01</span> College knowledge
-                  </div>
-                  <div>
-                    <span>02</span> FAISS retrieval
-                  </div>
-                  <div>
-                    <span>03</span> Grounded answers <Arrow diagonal />
-                  </div>
-                </div>
-                <div className="visual-footer">
-                  <span>CCET CAMPUS ASSISTANT</span>
-                  <span>CONTEXT → CLARITY</span>
-                </div>
-              </a>
-              <div className="project-details">
-                <div className="project-caption">
-                  <h3>
-                    <a
-                      href={`${github}/CCET-Campus-Assitance`}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                      <span>Tokens</span>
+                      <i>→</i>
+                      <span>Embeddings</span>
+                      <i>→</i>
+                      <span className="flow-block">
+                        Transformer<small>× 12 blocks</small>
+                      </span>
+                      <i>→</i>
+                      <span>Output</span>
+                    </div>
+                    <div className="visual-stats">
+                      <div>
+                        <strong>124M</strong>
+                        <span>PARAMETERS</span>
+                      </div>
+                      <div>
+                        <strong>19.66</strong>
+                        <span>TEST PERPLEXITY</span>
+                      </div>
+                      <div>
+                        <strong>4× V100</strong>
+                        <span>DISTRIBUTED TRAINING</span>
+                      </div>
+                    </div>
+                  </a>
+                  <div className="project-details">
+                    <div className="project-caption">
+                      <h3>
+                        <a
+                          href={`${github}/gpt-from-scratch`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          GPT-2 from scratch <Arrow diagonal />
+                        </a>
+                      </h3>
+                    </div>
+                    <p className="project-description">
+                      A complete decoder-only Transformer, from custom
+                      tokenization and causal self-attention to distributed
+                      training across four GPUs.
+                    </p>
+                    <ul
+                      className="project-tags"
+                      aria-label="GPT-2 technologies"
                     >
-                      College RAG assistant <Arrow diagonal />
-                    </a>
-                  </h3>
-                </div>
-                <p className="project-description">
-                  Helping students navigate college information with grounded
-                  answers, contextual retrieval, and memory across
-                  conversations.
-                </p>
-                <ul
-                  className="project-tags"
-                  aria-label="RAG assistant technologies"
+                      <li>PyTorch</li>
+                      <li>DDP</li>
+                      <li>WikiText-103</li>
+                    </ul>
+                  </div>
+                </article>
+                <article
+                  className="project"
+                  data-reveal="project"
+                  data-delay="90"
                 >
-                  <li>LangChain</li>
-                  <li>FAISS</li>
-                  <li>Gemini</li>
-                </ul>
+                  <a
+                    className="project-visual campus"
+                    data-tilt
+                    href={`${github}/CCET-Campus-Assitance`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="View College RAG Assistant on GitHub (opens in new tab)"
+                  >
+                    <div className="visual-top">
+                      <span>02 / RETRIEVAL & CONTEXT</span>
+                      <span className="visual-link">
+                        <Arrow diagonal />
+                      </span>
+                    </div>
+                    <div className="campus-title">
+                      Campus
+                      <br />
+                      <span>context.</span>
+                    </div>
+                    <div className="rag-flow">
+                      <div>
+                        <span>01</span> College knowledge
+                      </div>
+                      <div>
+                        <span>02</span> FAISS retrieval
+                      </div>
+                      <div>
+                        <span>03</span> Grounded answers <Arrow diagonal />
+                      </div>
+                    </div>
+                    <div className="visual-footer">
+                      <span>CCET CAMPUS ASSISTANT</span>
+                      <span>CONTEXT → CLARITY</span>
+                    </div>
+                  </a>
+                  <div className="project-details">
+                    <div className="project-caption">
+                      <h3>
+                        <a
+                          href={`${github}/CCET-Campus-Assitance`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          College RAG assistant <Arrow diagonal />
+                        </a>
+                      </h3>
+                    </div>
+                    <p className="project-description">
+                      Helping students navigate college information with
+                      grounded answers, contextual retrieval, and memory across
+                      conversations.
+                    </p>
+                    <ul
+                      className="project-tags"
+                      aria-label="RAG assistant technologies"
+                    >
+                      <li>LangChain</li>
+                      <li>FAISS</li>
+                      <li>Gemini</li>
+                    </ul>
+                  </div>
+                </article>
               </div>
-            </article>
+            </div>
           </div>
           <div className="project-list">
             {moreProjects.map((project, index) => (
